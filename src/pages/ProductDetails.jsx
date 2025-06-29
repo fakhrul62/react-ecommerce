@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
 import { toast } from 'react-toastify'
-import { apiRequest } from '../utils/api'
+import { apiRequest, getProxiedImageUrl } from '../utils/api'
 
 const ProductDetails = () => {
   const { slug } = useParams()
@@ -103,14 +103,14 @@ const ProductDetails = () => {
     
     // Add main product thumbnail first
     if (product.thumbnail) {
-      images.push(product.thumbnail)
+      images.push(getProxiedImageUrl(product.thumbnail))
     }
     
     // Add product images from the images array
     if (product.images && Array.isArray(product.images)) {
       product.images.forEach(imgObj => {
         if (imgObj.url) {
-          images.push(imgObj.url)
+          images.push(getProxiedImageUrl(imgObj.url))
         }
       })
     }
@@ -119,31 +119,35 @@ const ProductDetails = () => {
     if (product.image && typeof product.image === 'object') {
       Object.values(product.image).forEach(img => {
         if (typeof img === 'string') {
-          images.push(img)
+          images.push(getProxiedImageUrl(img))
         } else if (img.url) {
-          images.push(img.url)
+          images.push(getProxiedImageUrl(img.url))
         }
       })
     }
     
     // Add selected variation image if available
     if (selectedVariation && selectedVariation.image) {
+      const proxiedVariationImage = getProxiedImageUrl(selectedVariation.image)
       // Add variation image to the front if it's not already included
-      if (!images.includes(selectedVariation.image)) {
-        images.unshift(selectedVariation.image)
+      if (!images.includes(proxiedVariationImage)) {
+        images.unshift(proxiedVariationImage)
       }
     }
     
     // Add variation images if available
     if (selectedVariation && selectedVariation.images && Array.isArray(selectedVariation.images)) {
       selectedVariation.images.forEach(imgObj => {
-        if (imgObj.url && !images.includes(imgObj.url)) {
-          images.push(imgObj.url)
+        if (imgObj.url) {
+          const proxiedUrl = getProxiedImageUrl(imgObj.url)
+          if (!images.includes(proxiedUrl)) {
+            images.push(proxiedUrl)
+          }
         }
       })
     }
     
-    return images.length > 0 ? images : ['/api/placeholder/400/400']
+    return images.length > 0 ? images : [getProxiedImageUrl('/api/placeholder/400/400')]
   }
 
   // Get all unique attributes and their options
@@ -202,8 +206,8 @@ const ProductDetails = () => {
       selectedAttributes,
       selectedColor: selectedAttributes?.Color || selectedAttributes?.color,
       selectedSize: selectedAttributes?.Size || selectedAttributes?.size,
-      thumbnail: selectedVariation?.image || product.thumbnail,
-      image: selectedVariation?.image || product.thumbnail,
+      thumbnail: getProxiedImageUrl(selectedVariation?.image || product.thumbnail),
+      image: getProxiedImageUrl(selectedVariation?.image || product.thumbnail),
       sku: selectedVariation?.sku || product.sku,
       available_stock: currentInfo.stock,
       store: 'Falcon Store' // You can extract this from product data if available

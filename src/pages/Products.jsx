@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'react-toastify'
-import { apiRequest } from '../utils/api'
+import { apiRequest, getProxiedImageUrl } from '../utils/api'
 
 const Products = () => {
   const [products, setProducts] = useState([])
@@ -245,7 +245,7 @@ const Products = () => {
               >
                 <div className="aspect-square bg-gray-100 relative">
                   <img 
-                    src={product.thumbnail || product.image || '/api/placeholder/300/300'} 
+                    src={getProxiedImageUrl(product.thumbnail || product.image)} 
                     alt={product.name || product.title}
                     className="w-full h-full object-cover"
                   />

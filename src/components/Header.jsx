@@ -14,7 +14,7 @@ import { HiOutlineBuildingStorefront } from 'react-icons/hi2'
 import { PiHeadphonesLight } from 'react-icons/pi'
 import { BsBoxSeam } from 'react-icons/bs'
 import { HiOutlineMenuAlt3 } from 'react-icons/hi'
-import { apiRequest } from '../utils/api'
+import { apiRequest, getProxiedImageUrl } from '../utils/api'
 
 const Header = () => {
   const [categories, setCategories] = useState([])
@@ -210,7 +210,7 @@ const Header = () => {
                   >
                     {category.image ? (
                       <img 
-                        src={category.image} 
+                        src={getProxiedImageUrl(category.image)} 
                         alt={category.name || category.title} 
                         className="w-12 h-12 object-cover rounded-lg mb-2"
                       />
