@@ -271,7 +271,11 @@ This creates a `dist` folder with all production files.
 npm install -g vercel
 vercel
 ```
-Vercel automatically handles SPA routing - no additional configuration needed.
+Vercel automatically handles SPA routing with the included `vercel.json` configuration.
+
+**Our `vercel.json` handles:**
+- API proxying: `/api/proxy/*` → HTTP API server
+- SPA routing: All other routes → `index.html` for React Router
 
 ### Netlify (Automatic SPA Support)
 1. `npm run build`
