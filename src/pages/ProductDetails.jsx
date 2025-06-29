@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
 import { toast } from 'react-toastify'
+import { apiRequest } from '../utils/api'
 
 const ProductDetails = () => {
   const { slug } = useParams()
@@ -17,8 +18,7 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         // Use the product endpoint which supports both slug and ID
-        const response = await fetch(`http://157.230.240.97:9999/api/v1/product/${slug}`)
-        const data = await response.json()
+        const data = await apiRequest(`product/${slug}`)
         
         console.log('Product API Response:', data) // Debug log
         

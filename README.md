@@ -101,6 +101,8 @@ The application connects to the following API endpoints:
 - **Categories**: `http://157.230.240.97:9999/api/v1/categories`
 - **Product Details**: `http://157.230.240.97:9999/api/v1/product/{slug}`
 
+**Note**: In production (Vercel), API calls are proxied through `/api/proxy/*` to handle HTTPS/HTTP mixed content issues.
+
 ### Environment Variables
 Create a `.env` file in the root directory for environment-specific configurations:
 
@@ -193,6 +195,70 @@ npm run lint         # Run ESLint
 ## 🚀 Deployment
 
 The application can be deployed to various platforms. **Important**: Since this is a Single Page Application (SPA) with client-side routing, you need to configure your server to serve `index.html` for all routes.
+
+### ⚠️ HTTPS/Mixed Content Issue
+
+When deploying to HTTPS platforms (like Vercel), you may encounter this error:
+```
+Mixed Content: The page at 'https://your-site.vercel.app/' was loaded over HTTPS, 
+but requested an insecure resource 'http://157.230.240.97:9999/api/v1/categories'. 
+This request has been blocked; the content must be served over HTTPS.
+```
+
+**Solutions:**
+
+#### Option 1: Use HTTPS API (Recommended)
+Check if your API supports HTTPS:
+```javascript
+// Change from:
+http://157.230.240.97:9999/api/v1/categories
+// To:
+https://157.230.240.97:9999/api/v1/categories
+```
+
+#### Option 2: Use Environment Variables
+Create different API URLs for development vs production:
+
+**Create `.env.development`:**
+```env
+VITE_API_BASE_URL=http://157.230.240.97:9999/api/v1
+```
+
+**Create `.env.production`:**
+```env
+VITE_API_BASE_URL=https://your-https-api.com/api/v1
+```
+
+**Update your components to use environment variables:**
+```javascript
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://157.230.240.97:9999/api/v1'
+
+// Use in fetch calls:
+fetch(`${API_BASE_URL}/categories`)
+```
+
+#### Option 3: Proxy API Calls (Development)
+For development, add to `vite.config.js`:
+```javascript
+export default defineConfig({
+  // ...existing config
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://157.230.240.97:9999',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api/v1')
+      }
+    }
+  }
+})
+```
+
+#### Option 4: CORS Proxy (Temporary)
+Use a CORS proxy service (not recommended for production):
+```javascript
+const API_BASE_URL = 'https://cors-anywhere.herokuapp.com/http://157.230.240.97:9999/api/v1'
+```
 
 ### Quick Deploy (Build First)
 ```bash

@@ -14,6 +14,7 @@ import { HiOutlineBuildingStorefront } from 'react-icons/hi2'
 import { PiHeadphonesLight } from 'react-icons/pi'
 import { BsBoxSeam } from 'react-icons/bs'
 import { HiOutlineMenuAlt3 } from 'react-icons/hi'
+import { apiRequest } from '../utils/api'
 
 const Header = () => {
   const [categories, setCategories] = useState([])
@@ -63,8 +64,7 @@ const Header = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://157.230.240.97:9999/api/v1/categories')
-      const data = await response.json()
+      const data = await apiRequest('categories')
       
       // Handle different API response structures
       if (Array.isArray(data)) {

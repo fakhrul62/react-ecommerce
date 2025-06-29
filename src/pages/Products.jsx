@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'react-toastify'
+import { apiRequest } from '../utils/api'
 
 const Products = () => {
   const [products, setProducts] = useState([])
@@ -99,8 +100,7 @@ const Products = () => {
       let hasMorePages = true
       
       while (hasMorePages && currentPageNum <= 10) { // Limit to 10 pages for performance
-        const response = await fetch(`http://157.230.240.97:9999/api/v1/shop/products?page=${currentPageNum}`)
-        const data = await response.json()
+        const data = await apiRequest(`shop/products?page=${currentPageNum}`)
         
         if (data.data && Array.isArray(data.data) && data.data.length > 0) {
           allProductsData = [...allProductsData, ...data.data]
@@ -125,8 +125,7 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://157.230.240.97:9999/api/v1/categories')
-      const data = await response.json()
+      const data = await apiRequest('categories')
       
       // Handle different API response structures
       if (Array.isArray(data)) {
