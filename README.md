@@ -192,24 +192,80 @@ npm run lint         # Run ESLint
 
 ## 🚀 Deployment
 
-The application can be deployed to various platforms:
+The application can be deployed to various platforms. **Important**: Since this is a Single Page Application (SPA) with client-side routing, you need to configure your server to serve `index.html` for all routes.
 
-### Vercel
+### Quick Deploy (Build First)
+```bash
+npm run build
+```
+This creates a `dist` folder with all production files.
+
+### Vercel (Recommended - Zero Config)
 ```bash
 npm install -g vercel
 vercel
 ```
+Vercel automatically handles SPA routing - no additional configuration needed.
 
-### Netlify
-```bash
-npm run build
-# Upload dist folder to Netlify
+### Netlify (Automatic SPA Support)
+1. `npm run build`
+2. Upload `dist` folder to Netlify
+3. Netlify automatically detects it's a React app and configures routing
+
+**Or create `public/_redirects` file:**
+```
+/*    /index.html   200
+```
+
+### Apache Server
+Create `.htaccess` file in your `dist` folder:
+```apache
+Options -MultiViews
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.html [QR,L]
+```
+
+### Nginx Server
+Add to your Nginx configuration:
+```nginx
+location / {
+    try_files $uri $uri/ /index.html;
+}
 ```
 
 ### GitHub Pages
-```bash
-npm run build
-# Deploy dist folder to gh-pages branch
+**Note**: GitHub Pages doesn't support server-side redirects well for SPAs.
+For GitHub Pages, consider using hash routing or a service like Vercel/Netlify instead.
+
+### Generic Web Hosting
+1. Upload `dist` folder contents to your web root
+2. Configure server to serve `index.html` for 404 errors
+3. Ensure all routes point to `index.html`
+
+### Docker Deployment
+```dockerfile
+FROM nginx:alpine
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+**nginx.conf for Docker:**
+```nginx
+events { worker_connections 1024; }
+http {
+    include /etc/nginx/mime.types;
+    server {
+        listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
 ```
 
 ## 🤝 Contributing
