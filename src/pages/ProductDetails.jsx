@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
 import { toast } from 'react-toastify'
-import { apiRequest, getProxiedImageUrl } from '../utils/api'
+import { getProxiedImageUrl } from '../utils/api'
 
 const ProductDetails = () => {
   const { slug } = useParams()
@@ -17,19 +17,98 @@ const ProductDetails = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        // Use the product endpoint which supports both slug and ID
-        const data = await apiRequest(`product/${slug}`)
+        // Fetch product details from local JSON file
+        const response = await fetch('/json/product_details.json')
+        const data = await response.json()
         
-        console.log('Product API Response:', data) // Debug log
+        console.log('Product Details JSON loaded:', data.length, 'products') // Debug log
         
-        // Handle API response structure - the data is directly in the response
-        let productData = data.data || data
+        // Find the product by slug or ID
+        let productData = null
+        if (Array.isArray(data)) {
+          productData = data.find(product => 
+            product.slug === slug || 
+            product.id.toString() === slug
+          )
+        }
         
-        setProduct(productData)
+        if (!productData) {
+          console.error('Product not found:', slug)
+          toast.error('Product not found.')
+          setLoading(false)
+          return
+        }
+        
+        // Transform the data structure to match expected format
+        const transformedProduct = {
+          ...productData,
+          thumbnail: productData.thumbnail || productData.image?.[1]?.url || productData.image?.url,
+          // Handle pricing for both variant and non-variant products
+          regular_price: productData.product_detail?.regular_price || 
+                        productData.shop_product?.e_price || 
+                        productData.variations?.[0]?.price || '0',
+          discount_price: productData.product_detail?.discount_price || 
+                         productData.shop_product?.e_discount_price || null,
+          rating_avg: productData.rating_avg || 4.5, // Default rating
+          rating_count: productData.rating_count || 120, // Default count
+          available_stock: productData.total_stock_qty || 0,
+          total_stock_qty: productData.total_stock_qty || 0,
+          images: productData.image ? Object.values(productData.image) : [],
+          // Transform variations to match expected structure
+          variations: productData.variations?.map(variation => ({
+            id: variation.sku || variation.id,
+            sku: variation.sku,
+            regular_price: variation.regular_price || variation.price,
+            discount_price: variation.discount_price || null,
+            // Handle stock - some variations have individual stock, others inherit from main product
+            total_stock_qty: variation.stock !== undefined ? parseInt(variation.stock) || 0 : 
+                            (productData.total_stock_qty ? Math.floor(productData.total_stock_qty / productData.variations.length) : 0),
+            image: variation.image?.[1]?.url || variation.image?.url,
+            images: variation.image ? Object.values(variation.image) : [],
+            // Handle different variation attribute structures
+            variation_attributes: (() => {
+              const attributes = []
+              
+              // Handle new structure: variation_attributes with id, name, option
+              if (variation.variation_attributes && Array.isArray(variation.variation_attributes)) {
+                variation.variation_attributes.forEach(attr => {
+                  if (attr.name && attr.option) {
+                    attributes.push({
+                      attribute: { name: attr.name },
+                      attribute_option: { attribute_value: attr.option }
+                    })
+                  }
+                })
+              }
+              
+              // Handle old structure: attributes object
+              if (variation.attributes && typeof variation.attributes === 'object') {
+                Object.entries(variation.attributes).forEach(([key, value]) => {
+                  attributes.push({
+                    attribute: { name: key },
+                    attribute_option: { attribute_value: value }
+                  })
+                })
+              }
+              
+              // Handle direct color property
+              if (variation.color) {
+                attributes.push({
+                  attribute: { name: 'Color' },
+                  attribute_option: { attribute_value: variation.color }
+                })
+              }
+              
+              return attributes
+            })()
+          })) || []
+        }
+        
+        setProduct(transformedProduct)
         
         // If it's a variant product, set the first variation as default
-        if (productData.is_variant && productData.variations?.length > 0) {
-          const firstVariation = productData.variations[0]
+        if (transformedProduct.is_variant && transformedProduct.variations?.length > 0) {
+          const firstVariation = transformedProduct.variations[0]
           setSelectedVariation(firstVariation)
           
           // Set default attributes based on first variation
@@ -44,7 +123,7 @@ const ProductDetails = () => {
           setSelectedAttributes(defaultAttributes)
         }
       } catch (error) {
-        console.error('Error fetching product:', error)
+        console.error('Error fetching product from JSON:', error)
         toast.error('Failed to load product details. Please try again.')
       } finally {
         setLoading(false)
@@ -85,16 +164,15 @@ const ProductDetails = () => {
       return {
         price: selectedVariation.discount_price || selectedVariation.regular_price,
         originalPrice: selectedVariation.regular_price,
-        stock: selectedVariation.total_stock_qty
+        stock: selectedVariation.total_stock_qty || 0
       }
-    } else if (product.product_detail) {
+    } else {
       return {
-        price: product.product_detail.discount_price || product.product_detail.regular_price,
-        originalPrice: product.product_detail.regular_price,
-        stock: product.total_stock_qty
+        price: product.discount_price || product.regular_price,
+        originalPrice: product.regular_price,
+        stock: product.available_stock || product.total_stock_qty || 0
       }
     }
-    return { price: '0', originalPrice: null, stock: 0 }
   }
 
   // Get current images
@@ -210,12 +288,12 @@ const ProductDetails = () => {
       image: getProxiedImageUrl(selectedVariation?.image || product.thumbnail),
       sku: selectedVariation?.sku || product.sku,
       available_stock: currentInfo.stock,
-      store: 'Falcon Store' // You can extract this from product data if available
+      store: 'BechaKena Store' // You can extract this from product data if available
     }
 
     // Save to localStorage
     try {
-      const existingCart = JSON.parse(localStorage.getItem('falcon-cart') || '[]')
+      const existingCart = JSON.parse(localStorage.getItem('bechakena-cart') || '[]')
       
       // Check if item with same ID already exists
       const existingItemIndex = existingCart.findIndex(item => item.id === cartItem.id)
@@ -236,7 +314,7 @@ const ProductDetails = () => {
       }
       
       // Save updated cart to localStorage
-      localStorage.setItem('falcon-cart', JSON.stringify(existingCart))
+      localStorage.setItem('bechakena-cart', JSON.stringify(existingCart))
       
       console.log('Added to cart:', cartItem)
       

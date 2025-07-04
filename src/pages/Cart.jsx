@@ -49,7 +49,7 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState(() => {
     // Try to load cart from localStorage
     try {
-      const savedCart = localStorage.getItem('falcon-cart')
+      const savedCart = localStorage.getItem('bechakena-cart')
       return savedCart ? JSON.parse(savedCart) : []
     } catch (error) {
       console.error('Error loading cart from localStorage:', error)
@@ -77,7 +77,7 @@ const Cart = () => {
   // Also listen for storage changes in case cart is updated in another tab
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === 'falcon-cart') {
+      if (e.key === 'bechakena-cart') {
         try {
           const newCart = e.newValue ? JSON.parse(e.newValue) : []
           setCartItems(newCart)
@@ -98,7 +98,7 @@ const Cart = () => {
   // Save cart to localStorage whenever it changes
   const saveCartToStorage = (items) => {
     try {
-      localStorage.setItem('falcon-cart', JSON.stringify(items))
+      localStorage.setItem('bechakena-cart', JSON.stringify(items))
     } catch (error) {
       console.error('Error saving cart to localStorage:', error)
       toast.error('Failed to save cart. Please try again.')
@@ -198,7 +198,7 @@ const Cart = () => {
     }
     
     // Demo coupon functionality
-    if (couponCode.toUpperCase() === 'FALCON10') {
+    if (couponCode.toUpperCase() === 'BECHAKENA10') {
       toast.success('Coupon applied! 10% discount added')
     } else {
       toast.error('Invalid coupon code')
@@ -388,7 +388,7 @@ const Cart = () => {
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder="Store / Falcon coupon"
+                    placeholder="Store / BechaKena coupon"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-l text-sm focus:outline-none focus:ring-2 focus:ring-[#00b795] focus:border-[#00b795]"
                   />
                   <button 

@@ -14,7 +14,7 @@ import { HiOutlineBuildingStorefront } from 'react-icons/hi2'
 import { PiHeadphonesLight } from 'react-icons/pi'
 import { BsBoxSeam } from 'react-icons/bs'
 import { HiOutlineMenuAlt3 } from 'react-icons/hi'
-import { apiRequest, getProxiedImageUrl } from '../utils/api'
+import { getProxiedImageUrl } from '../utils/api'
 
 const Header = () => {
   const [categories, setCategories] = useState([])
@@ -35,7 +35,7 @@ const Header = () => {
     }
 
     const handleStorageChange = (e) => {
-      if (e.key === 'falcon-cart') {
+      if (e.key === 'bechakena-cart') {
         updateCartCount()
       }
     }
@@ -52,7 +52,7 @@ const Header = () => {
 
   const updateCartCount = () => {
     try {
-      const savedCart = localStorage.getItem('falcon-cart')
+      const savedCart = localStorage.getItem('bechakena-cart')
       const cartItems = savedCart ? JSON.parse(savedCart) : []
       const totalItems = cartItems.reduce((total, item) => total + (item.quantity || 1), 0)
       setCartCount(totalItems)
@@ -64,9 +64,11 @@ const Header = () => {
 
   const fetchCategories = async () => {
     try {
-      const data = await apiRequest('categories')
+      // Fetch categories from local JSON file
+      const response = await fetch('/json/categories.json')
+      const data = await response.json()
       
-      // Handle different API response structures
+      // Handle the response structure
       if (Array.isArray(data)) {
         setCategories(data)
       } else if (data.data && Array.isArray(data.data)) {
@@ -74,11 +76,11 @@ const Header = () => {
       } else if (data.categories && Array.isArray(data.categories)) {
         setCategories(data.categories)
       } else {
-        console.log('Categories API response:', data)
+        console.log('Categories JSON response:', data)
         setCategories([]) // Fallback to empty array
       }
     } catch (error) {
-      console.error('Error fetching categories:', error)
+      console.error('Error fetching categories from JSON:', error)
       setCategories([]) // Fallback to empty array on error
     }
   }
@@ -91,7 +93,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
               <img src="/images/logo.png" className='w-6' alt="" /> 
-              <span className='text-white text-xl sm:text-2xl font-bold'>FALCON</span>
+              <span className='text-white text-xl sm:text-2xl font-bold'>BechaKena</span>
           </Link>
 
           {/* Search Bar */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router'
 import { toast } from 'react-toastify'
-import { apiRequest, getProxiedImageUrl } from '../utils/api'
+import { getProxiedImageUrl } from '../utils/api'
 
 const Products = () => {
   const [products, setProducts] = useState([])
@@ -36,19 +36,25 @@ const Products = () => {
       let filteredProducts = allProducts
       
       if (selectedCategory !== 'all') {
-        // For now, since products don't have category info in the API response,
-        // we'll use a simple search-based approach
-        // This will be improved once we get more category information
+        // Filter based on category slug or name
         filteredProducts = allProducts.filter(product => {
-          const productName = (product.name || '').toLowerCase()
-          const categoryName = selectedCategory.toLowerCase()
+          const productCategorySlug = (product.category_slug || '').toLowerCase()
+          const selectedCategoryLower = selectedCategory.toLowerCase()
+          const selectedCategorySlug = categories.find(cat => 
+            (cat.name || '').toLowerCase() === selectedCategoryLower
+          )?.slug || selectedCategoryLower
           
-          // Simple keyword matching based on category name
+          // Try exact match first
+          if (productCategorySlug === selectedCategorySlug) {
+            return true
+          }
+          
+          // Fallback to keyword matching for products without proper category assignment
+          const productName = (product.name || '').toLowerCase()
           const categoryKeywords = {
-            "women's & girls' fashion": ['women', 'girl', 'ladies', 'female', 'dress', 'fashion'],
-            "men's & boys' fashion": ['men', 'boy', 'male', 'shirt', 'pant'],
-            "electronics devices": ['phone', 'laptop', 'computer', 'electronic', 'device', 'iphone', 'samsung'],
-            "home & lifestyle": ['home', 'kitchen', 'furniture', 'decor'],
+            "electronics": ['phone', 'laptop', 'computer', 'electronic', 'device', 'iphone', 'samsung', 'macbook', 'dell', 'tablet'],
+            "fashion": ['women', 'men', 'girl', 'boy', 'ladies', 'male', 'female', 'dress', 'fashion', 'clothing', 'shirt', 'pant'],
+            "home & lifestyle": ['home', 'kitchen', 'furniture', 'decor', 'lifestyle'],
             "health & beauty": ['beauty', 'health', 'cosmetic', 'skincare'],
             "sports & outdoor": ['sport', 'outdoor', 'fitness', 'exercise'],
             "babies & toys": ['baby', 'toy', 'child', 'kid'],
@@ -56,7 +62,7 @@ const Products = () => {
             "automotive & motorbike": ['car', 'bike', 'auto', 'motor']
           }
           
-          const keywords = categoryKeywords[categoryName] || [categoryName]
+          const keywords = categoryKeywords[selectedCategorySlug] || [selectedCategorySlug]
           return keywords.some(keyword => productName.includes(keyword))
         })
         
@@ -88,34 +94,27 @@ const Products = () => {
     if (categoriesLoaded && allProducts.length > 0) {
       applyFiltersAndPagination()
     }
-  }, [selectedCategory, currentPage, allProducts, categoriesLoaded])
+  }, [selectedCategory, currentPage, allProducts, categoriesLoaded, categories])
 
   const fetchAllProducts = async () => {
     try {
       setLoading(true)
       
-      // Fetch all products by getting multiple pages
-      let allProductsData = []
-      let currentPageNum = 1
-      let hasMorePages = true
+      // Fetch products from local JSON file
+      const response = await fetch('/json/products.json')
+      const data = await response.json()
       
-      while (hasMorePages && currentPageNum <= 10) { // Limit to 10 pages for performance
-        const data = await apiRequest(`shop/products?page=${currentPageNum}`)
-        
-        if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-          allProductsData = [...allProductsData, ...data.data]
-          hasMorePages = currentPageNum < (data.last_page || 1)
-          currentPageNum++
-        } else {
-          hasMorePages = false
-        }
+      if (data.data && Array.isArray(data.data)) {
+        console.log(`Loaded ${data.data.length} products from local JSON file`)
+        setAllProducts(data.data)
+      } else {
+        console.error('Invalid products data structure:', data)
+        setAllProducts([])
+        toast.error('Failed to load products from local file.')
       }
       
-      console.log(`Fetched ${allProductsData.length} total products from ${currentPageNum - 1} pages`)
-      setAllProducts(allProductsData)
-      
     } catch (error) {
-      console.error('Error fetching all products:', error)
+      console.error('Error fetching products from local JSON:', error)
       setAllProducts([])
       toast.error('Failed to load products. Please refresh the page.')
     } finally {
@@ -125,9 +124,11 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const data = await apiRequest('categories')
+      // Fetch categories from local JSON file
+      const response = await fetch('/json/categories.json')
+      const data = await response.json()
       
-      // Handle different API response structures
+      // Handle the response structure
       if (Array.isArray(data)) {
         setCategories(data)
       } else if (data.data && Array.isArray(data.data)) {
@@ -135,12 +136,12 @@ const Products = () => {
       } else if (data.categories && Array.isArray(data.categories)) {
         setCategories(data.categories)
       } else {
-        console.log('Categories API response:', data)
+        console.log('Categories JSON response:', data)
         setCategories([])
       }
       setCategoriesLoaded(true)
     } catch (error) {
-      console.error('Error fetching categories:', error)
+      console.error('Error fetching categories from local JSON:', error)
       setCategories([])
       setCategoriesLoaded(true)
     }

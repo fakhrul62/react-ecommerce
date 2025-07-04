@@ -22,7 +22,7 @@ const Footer = () => {
             <div className="flex items-center space-x-3 mb-4 sm:mb-6">
               <Link to="/" className="flex items-center space-x-2">
                 <img src="/images/logo.png" className="w-6 sm:w-9" alt="" />
-                <span className="text-white text-2xl sm:text-5xl font-bold">FALCON</span>
+                <span className="text-white text-2xl sm:text-5xl font-bold">BechaKena</span>
               </Link>
             </div>
             <p className="text-sm text-gray-300 mb-4 sm:mb-6 leading-relaxed">
@@ -48,7 +48,7 @@ const Footer = () => {
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center flex-shrink-0">
                   <FaEnvelope className="w-3 h-3 sm:w-4 sm:h-4 text-slate-900" />
                 </div>
-                <span className="text-gray-300 text-xs sm:text-sm">falcon@gmail.com</span>
+                <span className="text-gray-300 text-xs sm:text-sm">BechaKena@gmail.com</span>
               </div>
             </div>
           </div>
@@ -271,7 +271,7 @@ const Footer = () => {
           </div>
 
           <div className="text-center mt-6 sm:mt-8 text-xs sm:text-sm text-gray-400">
-            Falcon ©2025. Design by Fakhrul
+            BechaKena ©2025. Design by Fakhrul
           </div>
         </div>
       </div>

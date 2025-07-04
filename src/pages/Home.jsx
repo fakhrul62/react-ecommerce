@@ -8,7 +8,7 @@ const Home = () => {
       <div className="container mx-auto px-6 py-16">
         <div className="text-center">
           <h1 className='text-[#00b795] text-6xl font-bold mb-6'>
-            Welcome to Falcon Store
+            Welcome to BechaKena Store
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Discover amazing products at unbeatable prices. Shop with confidence and enjoy fast delivery to your doorstep.

@@ -1,4 +1,4 @@
-# Falcon Store - Modern E-commerce Frontend
+# BechaKena Store - Modern E-commerce Frontend
 
 A modern, responsive React-based e-commerce frontend built with cutting-edge technologies for an exceptional shopping experience.
 
@@ -33,7 +33,7 @@ A modern, responsive React-based e-commerce frontend built with cutting-edge tec
 ## 📁 Project Structure
 
 ```
-falcon-store/
+bechakena-store/
 ├── public/
 │   └── images/
 │       └── logo.png
@@ -68,8 +68,8 @@ falcon-store/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/falcon-store.git
-   cd falcon-store
+   git clone https://github.com/your-username/bechakena-store.git
+   cd bechakena-store
    ```
 
 2. **Install dependencies**
@@ -108,7 +108,7 @@ Create a `.env` file in the root directory for environment-specific configuratio
 
 ```env
 VITE_API_BASE_URL=http://157.230.240.97:9999/api/v1
-VITE_APP_NAME=Falcon Store
+VITE_APP_NAME=BechaKena Store
 ```
 
 ## 📱 Responsive Design
@@ -359,7 +359,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@falconstore.com or create an issue in this repository.
+For support, email support@bechakena.com or create an issue in this repository.
 
 ---
 
