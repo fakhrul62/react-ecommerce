@@ -50,7 +50,7 @@
         { "id": 3, "name": "Hot Deal", "type": 3, "type_label": "Discount" }
       ],
       "badgeProductVariationsExclude": [],
-      "category_slug": "shoes-bags"
+      "category_slug": "automotive"
     },
     {
       "id": 4,
@@ -2674,7 +2674,7 @@
       "available_stock": 45,
       "badges": [{ "id": 934, "name": "Cardio", "type": 83, "type_label": "Exercise" }],
       "badgeProductVariationsExclude": [],
-      "category_slug": "sports-fitness"
+      "category_slug": "musical-instruments"
     },
     {
       "id": 12005,
